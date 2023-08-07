@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Membuat model user
+model User {
+  username String  @id @db.VarChar(100)
+  password String  @db.VarChar(100)
+  name     String  @db.VarChar(100)
+  token    String? @db.VarChar(100)
+
+  // Foreign Key ke Contact
+  contacts Contact[] // maksudnya 1 user memiliki banyak kontak
+
+  // Menentukan nama table
+  @@map("users")
+}
+
+// Membuat Model Contact
+model Contact {
+  id         Int     @id @default(autoincrement())
+  first_name String  @db.VarChar(100)
+  last_name  String? @db.VarChar(100)
+  email      String? @db.VarChar(200)
+  phone      String? @db.VarChar(20)
+  username   String  @db.VarChar(100)
+
+  // Foreign Key ke table user
+  user User @relation(fields: [username], references: [username]) // reference ke username yang ada di user
+
+  // Foreign Key ke address
+  addresses Address[]
+
+  @@map("contacts")
+}
+
+// Membuat Model Address
+model Address {
+  id          Int     @id @default(autoincrement())
+  street      String? @db.VarChar(255)
+  city        String? @db.VarChar(100)
+  province    String? @db.VarChar(100)
+  country     String? @db.VarChar(100)
+  postal_code String? @db.VarChar(10)
+  contact_id  Int
+
+  // Relasi ke table kontak
+  contact Contact @relation(fields: [contact_id], references: [id])
+
+  @@map("addresses")
+}
+
+// Note:
+// Jika dibelakang type data ada tanda tanya, maka artinya field tersebut is null (boleh kosong)
+// Setelah Selesai mendefinisikan model, jalankan perintah npx prisma migrate dev --create-only
+// Cek Folder Migrations didalam folder prisma
+// Running npx prisma migrate dev (untuk eksekusi ke mysql)
